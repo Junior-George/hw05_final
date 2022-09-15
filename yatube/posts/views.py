@@ -119,7 +119,7 @@ def follow_index(request):
     # информация о текущем пользователе доступна в переменной request.user
     post = Post.objects.filter(
         author__following__user=request.user
-        )
+    )
     paginator = Paginator(post, AMOUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
