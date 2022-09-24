@@ -1,6 +1,9 @@
+from http import HTTPStatus
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
-from posts.models import Post, Group
+from django.test import Client
+from django.test import TestCase
+from posts.models import Group
+from posts.models import Post
 from django.urls import reverse
 from django.core.cache import cache
 
@@ -31,7 +34,7 @@ class PostURLTests(TestCase):
         # Создаем второй клиент
         self.authorized_client = Client()
         # Авторизуем пользователя
-        self.authorized_client.force_login(self.somebody)
+        self.authorized_client.force_login(self.user)
         self.templates_url_names = {
             'posts/index.html': '/',
             'posts/group_list.html': '/group/test-slug/',
@@ -41,18 +44,21 @@ class PostURLTests(TestCase):
         cache.clear()
 
     def test_urls_uses_correct_template_when_authorised(self):
+        """ urls используют корректные темплейты для авторизованных юзеров """
         for template, address in self.templates_url_names.items():
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
 
     def test_urls_uses_correct_template_when_not_authorised(self):
+        """ темплейты для неавторизованных """
         for template, address in self.templates_url_names.items():
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
                 self.assertTemplateUsed(response, template)
 
     def test_urls_uses_correct_template_for_authorised(self):
+        """ urls используют корректные темплейты для авторизованных юзеров """
         templates_url_names = {
             'posts/create_post.html': '/create/',
         }
@@ -62,6 +68,7 @@ class PostURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_uses_correct_template_for_owner(self):
+        """ urls используют корректные темплейты для создателя поста """
         templates_url_names = {
             'posts/create_post.html': '/posts/1/edit/',
         }
@@ -71,14 +78,17 @@ class PostURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_unexisting_page_404(self):
+        """ несуществующая страница выдает ошибку 404 """
         response = self.guest_client.get('/unexisting/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_create_for_guest_client(self):
+        """ гость при создании поста переводится на авторизацию """
         response = self.guest_client.get('/create/')
         self.assertRedirects(response, '/auth/login/?next=/create/')
 
     def test_urls_edit_for_author_correct_template(self):
+        """ создатель может редактировать пост """
         author_templates_url_names = {
             'posts/create_post.html': '/posts/1/edit/',
         }
@@ -88,6 +98,7 @@ class PostURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_edit_for_guest_correct_template(self):
+        """ гость не может редактировать пост """
         author_templates_url_names = {
             'posts/create_post.html': '/posts/1/edit/',
         }
@@ -97,6 +108,7 @@ class PostURLTests(TestCase):
                 self.assertTemplateNotUsed(response, template)
 
     def test_comment_only_users(self):
+        """ коментарии оставляют только авторизованные юзеры """
         data_user = {
             'text': 'я пользователь!'
         }
@@ -116,4 +128,4 @@ class PostURLTests(TestCase):
         self.assertRedirects(
             response_guest, '/auth/login/?next=/posts/1/comment/'
         )
-        self.assertAlmostEqual(response_user.status_code, 200)
+        self.assertAlmostEqual(response_user.status_code, HTTPStatus.OK)

@@ -1,7 +1,9 @@
 from posts.forms import PostForm
-from ..models import Post, Comment
+from ..models import Post
+from ..models import Comment
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client
+from django.test import TestCase
 from django.urls import reverse
 
 User = get_user_model()
@@ -27,6 +29,7 @@ class PostCreateFormTests(TestCase):
         self.authorized_no_auth_client.force_login(self.user_no_author)
 
     def test_edit_post(self):
+        """ Тестируем функцию изменить пост' """
         posts_count = Post.objects.count()
         form_data = {
             'text': 'Новый текст поста'
@@ -46,7 +49,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(posts_count, Post.objects.count())
 
     def test_create_post(self):
-        """Валидная форма создает запись в Post."""
+        """ Тестируем добавление поста через .count """
         posts_count = Post.objects.count()
         form_data = {
             'text': 'Новый пост в пост креате',
@@ -56,10 +59,10 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), posts_count + 1)
 
     def test_comment_exists(self):
+        """ Тестируем добавление комментария """
         form_data = {
             'text': 'Коммент'
         }

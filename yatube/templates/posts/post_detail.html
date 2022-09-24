@@ -28,9 +28,11 @@
             все посты пользователя
           </a>
         </li>
+        {% if author %}
         <a class="btn btn-default" href="{% url 'posts:post_edit' post_id=post.pk %}">
           <span class="glyphicon glyphicon-pencil">Редактировать</span>
         </a>
+        {% endif %}
       </ul>
     </aside>
     <article class="col-12 col-md-9">

@@ -1,7 +1,10 @@
 from django.core.cache import cache
-from django.test import Client, TestCase
+from django.test import Client
+from django.test import TestCase
 from django.urls import reverse
-from posts.models import Group, Post, User
+from posts.models import Group
+from posts.models import Post
+from posts.models import User
 
 
 class TestaCache(TestCase):
@@ -24,6 +27,7 @@ class TestaCache(TestCase):
         self.main = reverse('posts:main')
 
     def test_cache_index(self):
+        """ Тестируем, что в кэш добавляется и удалается пост """
         get_obj = self.guest_client.get(self.main)
         Post.objects.create(
             text='Новый текст',

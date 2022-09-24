@@ -17,10 +17,6 @@ class Group(models.Model):
 
 class Post(models.Model):
 
-    class Meta:
-        ordering = ['-pub_date']
-        verbose_name = 'Пост'
-        verbose_name_plural = 'Посты'
     text = models.TextField(
         'Текст поста',
         help_text='Введите текст поста',
@@ -47,8 +43,14 @@ class Post(models.Model):
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
-        blank=True
+        blank=True,
+        help_text='Картинка, которая будет в после'
     )
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Пост'
+        verbose_name_plural = 'Посты'
 
     def __str__(self):
         return self.text[:MAX_LENGHT]
@@ -77,7 +79,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return self.text[:MAX_LENGHT]
 
 
 class Follow(models.Model):

@@ -2,10 +2,14 @@ import shutil
 import tempfile
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase, override_settings
+from django.test import Client
+from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
 from django import forms
-from posts.models import Post, Group, Follow
+from posts.models import Group
+from posts.models import Follow
+from posts.models import Post
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
@@ -59,6 +63,7 @@ class PostViewsTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_pages_uses_correct_template(self):
+        """ корректные темплейты """
         templates_pages_names = {
             reverse('posts:main'): 'posts/index.html',
             reverse(
@@ -81,6 +86,7 @@ class PostViewsTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_post_detail_show_correct_context(self):
+        """ тестируем контекст """
         response = self.authorized_client.get(reverse(
             'posts:post_detail',
             kwargs={'post_id': self.post.id
@@ -90,6 +96,7 @@ class PostViewsTests(TestCase):
         self.assertEqual(post, self.post)
 
     def test_edit_uses_correct_form(self):
+        """ тестируем формы """
         response = self.authorized_client.get(reverse(
             'posts:post_edit', kwargs={
                 'post_id': self.post.id}
@@ -103,6 +110,7 @@ class PostViewsTests(TestCase):
                 self.assertIsInstance(form_field, type)
 
     def test_create_uses_correct_form(self):
+        """ форма создания пользователя """
         response = self.authorized_client.get(reverse('posts:post_create'))
         form_fields = {
             'group': forms.fields.ChoiceField,
@@ -114,6 +122,7 @@ class PostViewsTests(TestCase):
                 self.assertIsInstance(form_field, field_type)
 
     def test_post_in_right_places(self):
+        """ новый пост на первом месте """
         post = Post.objects.create(
             text='Новый пост',
             group=self.group,
@@ -132,6 +141,7 @@ class PostViewsTests(TestCase):
         self.assertEqual(post, context_profile)
 
     def test_post_in_right_group(self):
+        """ пост в указанной группе """
         response_index = self.authorized_client.get(reverse('posts:main'))
         response_group_posts = self.authorized_client.get(
             reverse('posts:group_posts',
@@ -148,6 +158,7 @@ class PostViewsTests(TestCase):
         self.assertNotEqual(PostViewsTests, context_profile)
 
     def test_image_to_context(self):
+        """ тестируем картинку """
         field_templates = {
             reverse('posts:main'),
             reverse('posts:profile',
@@ -166,6 +177,7 @@ class PostViewsTests(TestCase):
                 )
 
     def test_core_404_uses_correct_template(self):
+        """ страница 404 с правильным темплейтом """
         template_name = {
             reverse(
                 'posts:profile', kwargs={'username': self.user}
@@ -199,6 +211,7 @@ class PaginatorViewsTest(TestCase):
         cache.clear()
 
     def test_first_page_contains_ten_records(self):
+        """ в паджинаторе на первой странице 10 постов """
         paginator_pages = {
             reverse('posts:main'),
             reverse('posts:group_posts', kwargs={'slug': self.group.slug}),
@@ -211,6 +224,7 @@ class PaginatorViewsTest(TestCase):
                 self.assertEqual(len(context_page), 10)
 
     def test_second_page_contains_five_records(self):
+        """ в паджинаторе на второй странице 5 постов """
         paginator_pages = {
             reverse('posts:main'),
             reverse('posts:group_posts', kwargs={'slug': self.group.slug}),
@@ -243,6 +257,7 @@ class TestaCache(TestCase):
         self.main = reverse('posts:main')
 
     def test_cache_index(self):
+        """ тестируем кеш при создании поста """
         get_obj = self.guest_client.get(self.main)
         Post.objects.create(
             text='Новый текст',
@@ -281,6 +296,7 @@ class FollowerViewsTest(TestCase):
         cache.clear()
 
     def test_authorized_user_follow_unfollow_author(self):
+        """ пользователь может подписываться и отписываться от автора """
         Follow.objects.create(
             author=self.author,
             user=self.follower
@@ -296,6 +312,7 @@ class FollowerViewsTest(TestCase):
         )
 
     def test_only_follower_see_author_post(self):
+        """ только подписчик видит посты кумира """
         Follow.objects.create(
             author=self.author,
             user=self.follower
