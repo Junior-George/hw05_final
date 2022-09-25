@@ -1,17 +1,14 @@
 import shutil
 import tempfile
+from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client
-from django.test import TestCase
-from django.test import override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django import forms
-from posts.models import Group
-from posts.models import Follow
-from posts.models import Post
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
+
+from posts.models import Group, Follow, Post
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -49,11 +46,8 @@ class PostViewsTests(TestCase):
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем второй клиент
         self.authorized_client = Client()
-        # Авторизуем пользователя
         self.authorized_client.force_login(self.user)
         cache.clear()
 

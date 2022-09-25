@@ -24,9 +24,7 @@ class PostCreateFormTests(TestCase):
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-        self.authorized_no_auth_client = Client()
-        self.authorized_no_auth_client.force_login(self.user_no_author)
+        self.authorized_client.force_login(PostCreateFormTests.user)
 
     def test_edit_post(self):
         """ Тестируем функцию изменить пост' """

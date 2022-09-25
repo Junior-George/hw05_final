@@ -93,7 +93,6 @@ def post_edit(request, post_id):
         'is_edit': True,
     }
     if form.is_valid():
-        post = form.save()
         post.save()
         return redirect('posts:post_detail', post_id=post_id)
     return render(request, 'posts/create_post.html', context)
@@ -113,7 +112,6 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    # информация о текущем пользователе доступна в переменной request.user
     post = Post.objects.filter(
         author__following__user=request.user
     )
@@ -127,18 +125,15 @@ def profile_follow(request, username):
     user = request.user
     """Автор поста"""
     author = User.objects.get(username=username)
-    follower = Follow.objects.filter(user=user, author=author)
-    if author != user and not follower.exists():
-        """создаю подписку"""
-        Follow.objects.create(
-            user=user,
-            author=author
-        )
+    Follow.objects.get_or_create(
+        user=user,
+        author=author
+    )
     return redirect('posts:profile', username=author.username)
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.get(user=request.user, author=author).delete()
+    Follow.objects.filter(user=request.user, author=author).delete()
     return redirect('posts:main')

@@ -2,10 +2,10 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.test import TestCase
-from posts.models import Group
-from posts.models import Post
 from django.urls import reverse
 from django.core.cache import cache
+
+from posts.models import Group, Post
 
 User = get_user_model()
 
@@ -27,13 +27,9 @@ class PostURLTests(TestCase):
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем пользователя
         self.somebody = User.objects.create_user(username='SomeBodyToLove')
-        # Создаем второй клиент
         self.authorized_client = Client()
-        # Авторизуем пользователя
         self.authorized_client.force_login(self.user)
         self.templates_url_names = {
             'posts/index.html': '/',
